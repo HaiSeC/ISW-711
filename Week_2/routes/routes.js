@@ -4,15 +4,15 @@ const router = express.Router();
 
 const Model = require('../model/model')
 
-router.post('/post', async (req, res) => {
+router.post('/user', async (req, res) => {
     const data = new Model({
         name: req.body.name,
-        age: req.body.age
+        lastname: req.body.lastname
     })
 
     try {
         const dataToSave = await data.save();
-        res.status(200).json(dataToSave)
+        res.status(200).json({"response": "El usuario " + dataToSave.name + " " + dataToSave.lastname + " fue creado"})
     } catch (error) {
         res.status(400).json({message: error.message})
         
@@ -20,51 +20,19 @@ router.post('/post', async (req, res) => {
 })
 
 
-router.get('/getAll', async (req, res) => {
+router.get('/hello', async (req, res) => {
+    let data;
     try {
-        const data = await Model.find();
-        res.json(data)
-    } catch (error) {
-        res.status(500).json({message: error.message})
-        
-    }
-})
-
-router.get('/getOne/:id', async (req, res) => {
-    try {
-        const data = await Model.findById(req.params.id)
+        if (req.query.message) {
+            data = {"response": "Hello " + req.query.message};
+        } else {
+            data = {"response":"Hello Word"};
+        }
         res.json(data)
     } catch (error) {
         res.status(500).json({message: error.message})
     }
 })
 
-router.patch('/update/:id', async (req, res)=>{
-    try {
-        const id = req.params.id
-        const updateData = req.body
-        const options = {new: true}
-        
-        const result = await Model.findByIdAndUpdate(
-            id, updateData, options
-        )
-
-        res.send(result)
-    } catch (error) {
-        res.status(400).json({ message: error.message })
-
-    }
-})
-
-router.delete('/delete/:id', async (req, res) => {
-    try {
-        const id = req.params.id;
-        const data = await Model.findByIdAndDelete(id)
-        res.send(`Document with ${data.name} has been deleted..`)
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message })
-    }
-})
 
 module.exports = router
