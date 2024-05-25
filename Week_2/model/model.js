@@ -5,9 +5,9 @@ const dataSchema = new mongoose.Schema({
         required: true,
         type: String
     },
-    age: {
+    lastname: {
         required: true,
-        type: Number
+        type: String
     }
 })
 
