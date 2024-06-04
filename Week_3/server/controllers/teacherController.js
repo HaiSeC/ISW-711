@@ -76,35 +76,18 @@ const teacherGet = (req, res) => {
  * @param {*} req
  * @param {*} res
  */
-const teacherPatch = (req, res) => {
+const teacherPatch = async (req, res) => {
   // get teacher by id
-  if (req.query && req.query.id) {
-    Teacher.findById(req.query.id, function (err, teacher) {
-      if (err) {
-        res.status(404);
-        console.log('error while queryting the teacher', err)
-        res.json({ error: "Teacher doesnt exist" })
-      }
-
-      // update the teacher object (patch)
-      teacher.first_name = req.body.first_name ? req.body.first_name : teacher.first_name;
-      teacher.last_name = req.body.last_name ? req.body.last_name : teacher.last_name;
-      // update the teacher object (put)
-      // teacher.title = req.body.title
-      // teacher.detail = req.body.detail
-
-      teacher.save(function (err) {
-        if (err) {
-          res.status(422);
-          console.log('error while saving the teacher', err)
-          res.json({
-            error: 'There was an error saving the teacher'
-          });
-        }
-        res.status(200); // OK
-        res.json(teacher);
-      });
-    });
+  if (req.params && req.params.id) {
+    let id = req.params.id
+    let updateData = {
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      cedula: req.body.cedula,
+      age: req.body.age
+    }
+    let response = await Teacher.findByIdAndUpdate(id, updateData)
+    res.send(`Document with ${response.first_name} was updated`)
   } else {
     res.status(404);
     res.json({ error: "Teacher doesnt exist" })
