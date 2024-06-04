@@ -5,34 +5,449 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Week 1 - Consume API</title>
+  <link rel="stylesheet" type="text/css" href="index.css">
   <script>
-    async function getTeachers() {
+    async function getTeachers(id) {
+      if (id) {
+        const response = await fetch("http://localhost:3001/api/teachers?id=" + id);
+        const teacher = await response.json();
+
+        return teacher
+      }
       const response = await fetch("http://localhost:3001/api/teachers");
       const teachers = await response.json();
       console.log(teachers);
 
+      return teachers
+    }
+
+    async function getTeachersB() {
+      let teachers = await getTeachers();
       const container = document.getElementById('result');
       teachers.forEach(element => {
         const item = document.createElement('li');
+        const deleteButton = document.createElement("button");
+        const updateButton = document.createElement("button");
+        deleteButton.textContent = "Eliminar";
+        deleteButton.className = "delete-button"
+        deleteButton.onclick = () => deleteTeacher(element._id)
+        updateButton.textContent = "Actualizar";
+        updateButton.className = "update-button"
+        updateButton.onclick = () => updateTeacher(element._id)
         item.innerHTML = `${element.first_name} ${element.last_name}`;
+        item.appendChild(updateButton);
+        item.appendChild(deleteButton)
         container.appendChild(item)
       });
+    }
+
+    async function getCourses(id = null) {
+      if (id && id != null) {
+        console.log('da')
+        const response = await fetch("http://localhost:3001/api/courses?id=" + id);
+        const course = await response.json();
+
+        return course
+      } else {
+
+        const response = await fetch("http://localhost:3001/api/courses");
+        const courses = await response.json();
+
+
+        const container = document.getElementById('courseResult');
+        courses.forEach(async element => {
+          const item = document.createElement('li');
+          const teacher = await getTeachers(element.teacher)
+          const deleteButton = document.createElement("button");
+          const updateButton = document.createElement("button");
+          deleteButton.textContent = "Eliminar";
+          deleteButton.className = "delete-button";
+          deleteButton.onclick = () => deleteCourse(element._id)
+          updateButton.textContent = "Actualizar";
+          updateButton.className = "update-button"
+          updateButton.onclick = () => updateCourse(element._id)
+          item.innerHTML = `${element.name} / ${teacher.first_name} ${teacher.last_name} `;
+          item.appendChild(updateButton);
+          item.appendChild(deleteButton)
+          container.appendChild(item)
+        });
+      }
+
+    }
+
+
+    async function getCareers(id = null) {
+
+      if (id && id != null) {
+        console.log('da')
+        const response = await fetch("http://localhost:3001/api/careers?id=" + id);
+        const career = await response.json();
+        console.log(career);
+
+        return career
+      } else {
+        console.log('do')
+        const response = await fetch("http://localhost:3001/api/careers");
+        const careers = await response.json();
+
+
+        const container = document.getElementById('careerResult');
+        careers.forEach(async element => {
+          const item = document.createElement('li');
+          const deleteButton = document.createElement("button");
+          const updateButton = document.createElement("button");
+          deleteButton.textContent = "Eliminar";
+          deleteButton.className = "delete-button";
+          deleteButton.onclick = () => deleteCareer(element._id)
+          updateButton.textContent = "Actualizar";
+          updateButton.className = "update-button"
+          updateButton.onclick = () => updateCareer(element._id)
+          item.innerHTML = `${element.code} - ${element.name} `;
+          item.appendChild(updateButton);
+          item.appendChild(deleteButton)
+          container.appendChild(item)
+        });
+      }
+    }
+
+    async function saveData(update) {
+      const firstName = document.getElementById("first_name").value;
+      const lastName = document.getElementById("last_name").value;
+      const cedula = document.getElementById("cedula").value;
+      const age = document.getElementById("age").value;
+
+      const data = {
+        first_name: firstName,
+        last_name: lastName,
+        cedula: cedula,
+        age: parseInt(age)
+      };
+
+      const jsonData = JSON.stringify(data);
+
+      try {
+        let response
+        if (update) {
+          let id = document.getElementById('hTeacherID').value
+          response = await fetch("http://localhost:3001/api/teachers/" + id, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+        } else {
+          response = await fetch("http://localhost:3001/api/teachers", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+        }
+        if (!response.ok) {
+          throw new Error('There was a trouble sending the data')
+        }
+
+        const result = await response.json();
+        console.log('Success: ', result)
+
+        alert("Se actualizaron los profesores correctamente")
+      } catch (error) {
+        alert("Hubo un error al actualizar: " + error)
+      }
+    }
+
+    async function saveCourse(update) {
+      const name = document.getElementById("name").value;
+      const credits = document.getElementById("credits").value;
+      const teacher = document.getElementById("teacher").value;
+
+      const data = {
+        name: name,
+        credits: parseInt(credits),
+        teacher: teacher
+      };
+
+      const jsonData = JSON.stringify(data);
+
+      try {
+        let response
+        if (update) {
+          let id = document.getElementById('hCourseID').value
+          response = await fetch("http://localhost:3001/api/courses/" + id, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+        } else {
+          response = await fetch("http://localhost:3001/api/courses", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+        }
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        alert("Se actualizo el curso correctamente")
+      } catch (error) {
+        alert("Hubo un error al actualizar: " + error)
+      }
+    }
+
+    async function saveCareer(update) {
+      const name = document.getElementById("career_name").value;
+      const code = document.getElementById("code").value;
+      const description = document.getElementById("description").value;
+
+      const data = {
+        name: name,
+        code: code,
+        description: description
+      };
+
+      const jsonData = JSON.stringify(data);
+
+      try {
+        let response
+        if (update) {
+          let id = document.getElementById("hCareerID").value
+          response = await fetch("http://localhost:3001/api/careers/" + id, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+
+        } else {
+          response = await fetch("http://localhost:3001/api/careers", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: jsonData
+          });
+
+        }
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        alert("Se actualizaron las carreras correctamente")
+      } catch (error) {
+        alert("Hubo un error al actualizar: " + error)
+      }
+    }
+
+    async function deleteCourse(id) {
+      try {
+        const response = await fetch('http://localhost:3001/api/courses/' + id, {
+          method: 'DELETE',
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(
+          res => res.text()
+        ).then(res => console.log(res))
+      } catch (error) {
+        console.error(error)
+      }
+      location.reload()
+    }
+
+    async function deleteCareer(id) {
+      try {
+        const response = await fetch('http://localhost:3001/api/careers/' + id, {
+          method: 'DELETE',
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }).then(
+          res => res.text()
+        ).then(res => console.log(res))
+      } catch (error) {
+        console.error(error)
+      }
+      location.reload()
+    }
+
+    async function deleteTeacher(id) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/teachers/${id}`, {
+          method: 'DELETE'
+        }).then(
+          res => res.text()
+        ).then(
+          res => console.log(res)
+        )
+      } catch (error) {
+        console.error(error)
+      }
+      location.reload()
+    }
+    async function updateCourse(id) {
+      const course = await getCourses(id)
+      document.getElementById('hCourseID').value = id
+      let name = document.getElementById("name");
+      let credits = document.getElementById("credits");
+      let teacher = document.getElementById("teacher");
+
+      name.value = course.name;
+      credits.value = course.credits;
+      teacher.value = course.teacher;
+
+      let buttonSave = document.getElementById("btnCourse")
+      let buttonUpdate = document.getElementById("btnUCourse")
+      let hiddenSave = buttonSave.getAttribute("hidden")
+
+      if (hiddenSave) {
+        buttonSave.removeAttribute("hidden")
+        buttonUpdate.setAttribute("hidden", "hidden")
+      } else {
+        buttonUpdate.removeAttribute("hidden")
+        buttonSave.setAttribute("hidden", "hidden")
+      }
+    }
+
+
+    async function updateTeacher(id) {
+      const teacher = await getTeachers(id)
+      document.getElementById("hTeacherID").value = id;
+      const firstName = document.getElementById("first_name");
+      const lastName = document.getElementById("last_name");
+      const cedula = document.getElementById("cedula");
+      const age = document.getElementById("age");
+
+      firstName.value = teacher.first_name
+      lastName.value = teacher.last_name
+      cedula.value = teacher.cedula
+      age.value = teacher.age
+
+      let buttonSave = document.getElementById("btnTeacher")
+      let buttonUpdate = document.getElementById("btnUTeacher")
+      let hiddenUpdate = buttonUpdate.getAttribute("hidden")
+      console.log(hiddenUpdate)
+      if (hiddenUpdate) {
+        buttonUpdate.removeAttribute("hidden")
+        buttonSave.setAttribute("hidden", "hidden")
+      } else {
+        buttonSave.removeAttribute("hidden")
+        buttonUpdate.setAttribute("hidden", "hidden")
+        console.log(buttonSave)
+      }
+
+
+
+    }
+    async function updateCareer(id) {
+      const career = await getCareers(id)
+      document.getElementById("hCareerID").value = id;
+      const name = document.getElementById("career_name");
+      const code = document.getElementById("code");
+      const description = document.getElementById("description");
+
+      name.value = career.name
+      code.value = career.code
+      description.value = career.description
+
+      let buttonSave = document.getElementById("btnCareer")
+      let buttonUpdate = document.getElementById("btnUCareer")
+      let hiddenSave = buttonSave.getAttribute("hidden")
+
+      if (hiddenSave) {
+        buttonSave.removeAttribute("hidden")
+        buttonUpdate.setAttribute("hidden", "hidden")
+      } else {
+        buttonUpdate.removeAttribute("hidden")
+        buttonSave.setAttribute("hidden", "hidden")
+      }
+    }
+
+    async function populateTeacherDropdown() {
+      let teachers = await getTeachers();
+      const teacherSelect = document.getElementById("teacher");
+      teacherSelect.innerHTML = '';
+
+      teachers.forEach(teacher => {
+        const option = document.createElement("option");
+        console.log(teacher)
+        option.value = teacher._id;
+        option.textContent = `${teacher.first_name} ${teacher.last_name}`;
+        teacherSelect.appendChild(option);
+      });
+    }
+
+    window.onload = () => {
+      populateTeacherDropdown()
     }
   </script>
 </head>
 
 <body>
-  <button onclick="getTeachers();">Get Teacher</button>
-  <h3>Results:</h3>
-  <ul id="result"></ul>
+  <div class="container">
+    <button onclick="getTeachersB();">Get Teacher</button>
+    <button onclick="getCourses();">Get Courses</button>
+    <button onclick="getCareers();">Get Careers</button>
+  </div>
 
-  <form action="save.php" method="post">
-    <div class="form-group">
-      <label for="">First Name</label>
-      <input type="text" name="first_name" class="form-control" placeholder="" aria-describedby="helpId">
-      <small id="helpId" class="text-muted">Escriba su primer nombre</small>
-    </div>
-  </form>
+  <h3>Results:</h3>
+  <div class="container">
+    <ul id="result"></ul>
+    <ul id="courseResult"></ul>
+    <ul id="careerResult"></ul>
+  </div>
+
+  <div class="container">
+    <form>
+      <input id="hTeacherID" hidden>
+      <label for="first_name">Nombre:</label><br>
+      <input type="text" id="first_name" name="first_name"><br><br>
+      <label for="last_name">Apellido:</label><br>
+      <input type="text" id="last_name" name="last_name"><br><br>
+      <label for="cedula">Cédula:</label><br>
+      <input type="text" id="cedula" name="cedula"><br><br>
+      <label for="age">Edad:</label><br>
+      <input type="number" id="age" name="age"><br><br>
+      <button type="button" id="btnTeacher" onclick="saveData()">Guardar</button>
+      <button type="button" id="btnUTeacher" onclick="saveData(true)" hidden="hidden">Actualizar</button>
+    </form>
+
+    <form>
+      <input id="hCourseID" hidden>
+      <label for="name">Nombre del Curso:</label><br>
+      <input type="text" id="name" name="name"><br><br>
+      <label for="credits">Créditos:</label><br>
+      <input type="number" id="credits" name="credits"><br><br>
+      <label for="teacher">Profesor:</label><br>
+      <select id="teacher" name="teacher"></select><br><br>
+      <button type="button" id="btnCourse" onclick="saveCourse()">Guardar</button>
+      <button type="button" id="btnUCourse" onclick="saveCourse(true)" hidden="hidden">Actualizar</button>
+    </form>
+
+
+    <form>
+      <input id="hCareerID" hidden>
+      <label for="name">Nombre de la Carrera:</label><br>
+      <input type="text" id="career_name" name="name"><br><br>
+      <label for="code">Codigo:</label><br>
+      <input type="text" id="code" name="code"><br><br>
+      <label for="description">Descripcion:</label><br>
+      <textarea id="description" name="description"></textarea><br><br>
+      <button type="button" id="btnCareer" onclick="saveCareer()">Guardar</button>
+      <button type="button" id="btnUCareer" onclick="saveCareer(true)" hidden="hidden">Actualizar</button>
+    </form>
+  </div>
+
+
+
 </body>
 
 </html>
