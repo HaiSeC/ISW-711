@@ -26,17 +26,30 @@ app.use(cors({
 }));
 
 const { teacherGet, teacherPost, teacherPatch, teacherDelete } = require('./controllers/teacherController');
-const { coursePost, courseGet } = require('./controllers/courseController');
+const { coursePost, courseGet, coursePatch, courseDelete } = require('./controllers/courseController');
+const { careerPost, careerGet, careerPatch, careerDelete } = require('./controllers/careerController');
 
 
 // listen to the task request
 app.post("/api/teachers", teacherPost);
 app.get("/api/teachers/",teacherGet);
+app.patch("/api/teachers/:id", teacherPatch);
+app.put("/api/teachers/:id", teacherPatch);
+app.delete("/api/teachers/:id", teacherDelete);
+
+
 app.post("/api/courses", coursePost);
 app.get("/api/courses/", courseGet);
-// app.patch("/api/teachers", teacherPatch);
-// app.put("/api/teachers", teacherPatch);
-// app.delete("/api/teachers", teacherDelete);
+app.patch("/api/courses/:id", coursePatch);
+app.put("/api/courses/:id", coursePatch);
+app.delete("/api/courses/:id", courseDelete);
+
+
+app.post("/api/careers", careerPost);
+app.get("/api/careers/", careerGet);
+app.patch("/api/careers/:id", careerPatch);
+app.put("/api/careers/:id", careerPatch);
+app.delete("/api/careers/:id", careerDelete);
 
 
 app.listen(3001, () => console.log(`Example app listening on port 3001!`))
