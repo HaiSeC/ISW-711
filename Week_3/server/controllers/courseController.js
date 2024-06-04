@@ -56,7 +56,49 @@ const courseGet = (req, res) => {
   }
 };
 
+
+ /**
+ * @param {*} req
+ * @param {*} res
+ */
+const coursePatch = async (req, res) => {
+  if (req.params && req.params.id) {
+    let id = req.params.id
+    let updateData = {
+      name: req.body.name,
+      credits: req.body.credits,
+      teacher: req.body.teacher
+    }
+    console.log("sdad")
+    let response = await Course.findByIdAndUpdate( id, updateData );
+    console.log(response)
+    res.send(`Document with ${response.name} has been updated`)
+  } else {
+    res.status(404);
+    res.json({ error: "Course doesnt exist" })
+  }
+};
+
+
+ /**
+ * @param {*} req
+ * @param {*} res
+ */
+
+const courseDelete = async (req, res) => {
+
+  if (req.params && req.params.id) {
+    const response = await Course.findByIdAndDelete(req.params.id)
+    res.send(`Document with ${ response.name } has been deleted`)
+  } else {
+    res.status(404);
+    res.json({ error: "Course doesnt exist" })
+  }
+};
+
 module.exports = {
   coursePost,
-  courseGet
+  courseGet,
+  coursePatch,
+  courseDelete
 }
