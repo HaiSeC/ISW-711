@@ -80,11 +80,12 @@ const teacherPatch = async (req, res) => {
   // get teacher by id
   if (req.params && req.params.id) {
     let id = req.params.id
+    let teacher = teacherGet(id)
     let updateData = {
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      cedula: req.body.cedula,
-      age: req.body.age
+      first_name: req.body.first_name ? req.body.first_name : teacher.first_name,
+      last_name: req.body.last_name ? req.body.last_name : teacher.last_name,
+      cedula: req.body.cedula ? req.body.cedula : teacher.cedula,
+      age: req.body.age ? req.body.age : teacher.age
     }
     let response = await Teacher.findByIdAndUpdate(id, updateData)
     res.send(`Document with ${response.first_name} was updated`)
